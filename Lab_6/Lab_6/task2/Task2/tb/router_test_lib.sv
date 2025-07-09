@@ -1,0 +1,227 @@
+
+class base_test extends uvm_test;
+  // factory registration
+  `uvm_component_utils(base_test)
+  
+  // constructor
+  function new (string name = "base_test", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction
+  
+  // testbench class handle
+  router_tb tb;
+  
+  //build phase for the test
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    `uvm_info("","Build Phase of test is being executed...!", UVM_HIGH)
+   
+    tb = router_tb::type_id::create("tb",this);
+  endfunction
+  
+  task run_phase(uvm_phase phase);
+    uvm_objection obj = phase.get_objection();
+    obj.set_drain_time(this,200ns);
+  endtask
+  
+  // end of elaboration phase
+  function void end_of_elaboration_phase (uvm_phase phase);
+    uvm_top.print_topology();
+  endfunction
+  
+  function void start_of_simulation_phase(uvm_phase phase);
+    `uvm_info(get_type_name(),"Starting Simulation...!", UVM_HIGH)
+  endfunction
+  
+  function void check_phase(uvm_phase phase);
+    check_config_usage();
+  endfunction
+  
+endclass
+
+
+class test_2 extends base_test;
+  // factory registration
+  `uvm_component_utils(test_2)
+  
+  // constructor for test 2
+  function new (string name = "test_2", uvm_component parent = null);
+    super.new(name,parent);
+    `uvm_info("Test2", "You are in Test2",UVM_HIGH)
+  endfunction
+  
+endclass
+
+
+
+class short_packet_test extends base_test;
+  
+  `uvm_component_utils(short_packet_test)
+  
+  function new(string name = "short_packet_test", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    set_type_override_by_type( yapp_packet::get_type(), short_yapp_packet::get_type() );
+  endfunction
+  
+endclass
+
+
+class set_config_test extends base_test;
+
+  `uvm_component_utils(set_config_test)
+  
+  function new(string name = "set_config_test", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    uvm_config_int::set(this,"tb.env.agent","is_active",UVM_PASSIVE);
+   // uvm_config_db#(int)::set(null,"uvm_test_top","verbosity",UVM_DEBUG);  // supressing configuration msgs from printing
+    super.build_phase(phase);
+  endfunction
+
+endclass
+
+
+class incr_payload_test extends base_test;
+
+  `uvm_component_utils(incr_payload_test)
+  
+  function new(string name = "incr_payload_test", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    set_type_override_by_type( yapp_packet::get_type(), short_yapp_packet::get_type() );
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.env.agent.sequencer.run_phase",
+                                 "default_sequence",
+                                 yapp_incr_payload_seq::get_type());
+  endfunction
+
+endclass
+
+
+class exhaustive_seq_test extends base_test;
+
+  `uvm_component_utils(exhaustive_seq_test)
+  
+  function new(string name = "exhaustive_seq_test", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    set_type_override_by_type( yapp_packet::get_type(), short_yapp_packet::get_type() );
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.env.agent.sequencer.run_phase",
+                                 "default_sequence",
+                                 yapp_exhaustive_seq::get_type());
+  endfunction
+
+endclass
+
+
+class yapp_test extends base_test;
+
+  `uvm_component_utils(yapp_test)
+  
+  function new(string name = "yapp_test", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    set_type_override_by_type( yapp_packet::get_type(), short_yapp_packet::get_type() );
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.env.agent.sequencer.run_phase",
+                                 "default_sequence",
+                                 yapp_012_seq::get_type());
+  endfunction
+
+endclass
+
+
+
+class simple_test extends base_test;
+  
+  `uvm_component_utils(simple_test)
+  
+  function new(string name="simple_test", uvm_component parent=null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    set_type_override_by_type(yapp_packet::get_type(), short_yapp_packet::get_type());
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.env.agent.sequencer.run_phase",
+                                 "default_sequence",
+                                 yapp_012_seq::get_type());
+    uvm_config_wrapper::set(this, "tb.chan?.rx_agent.sequencer.run_phase",
+                            "default_sequence",
+                            channel_rx_resp_seq::get_type());
+    uvm_config_wrapper::set(this, "tb.clock_and_reset.agent.sequencer.run_phase",
+							"default_sequence",
+							clk10_rst5_seq::get_type());	
+                                 
+  endfunction
+endclass
+
+
+
+class test_uvc_integration extends base_test;
+  
+  `uvm_component_utils(test_uvc_integration)
+  
+  function new(string name="test_uvc_integration", uvm_component parent=null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    set_type_override_by_type(yapp_packet::get_type(), short_yapp_packet::get_type());
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.env.agent.sequencer.run_phase",
+                                 "default_sequence",
+                                 simple_seq::get_type());
+    uvm_config_wrapper::set(this, "tb.chan?.rx_agent.sequencer.run_phase",
+                            "default_sequence",
+                            channel_rx_resp_seq::get_type());
+    uvm_config_wrapper::set(this, "tb.clock_and_reset.agent.sequencer.run_phase",
+							"default_sequence",
+							clk10_rst5_seq::get_type());
+    uvm_config_wrapper::set(this, "tb.hbus.masters[0].sequencer.run_phase",
+							"default_sequence",
+							hbus_small_packet_seq::get_type());	
+                                 
+  endfunction
+endclass
+
+class multi_channel_seq_test extends base_test;
+  
+  `uvm_component_utils(multi_channel_seq_test)
+  
+  function new(string name="multi_channel_seq_test", uvm_component parent=null);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    set_type_override_by_type(yapp_packet::get_type(), short_yapp_packet::get_type());
+    super.build_phase(phase);
+    uvm_config_wrapper::set(this, "tb.mcseqr.run_phase",
+                                 "default_sequence",
+                                 router_simple_mcseq::get_type());
+    uvm_config_wrapper::set(this, "tb.chan?.rx_agent.sequencer.run_phase",
+                            "default_sequence",
+                            channel_rx_resp_seq::get_type());
+    uvm_config_wrapper::set(this, "tb.clock_and_reset.agent.sequencer.run_phase",
+							"default_sequence",
+							clk10_rst5_seq::get_type());
+                            
+  endfunction
+endclass : multi_channel_seq_test
+
+
+
+

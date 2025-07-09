@@ -1,0 +1,14 @@
+Q # 1 What is the access policy of the control register (ctrl_reg)?
+Answer: read-write.
+Q # 2 What is the access policy of the address 0 register (addr0_cnt_reg)?
+Answer: read-only.
+Q # 3:What is the reset value of the plen field of ctrl_reg?
+Answer: 6'h3f.
+Q # 4:What is the size of the yapp_pkt_mem?
+Answer: 32'd256.
+Q # 5:What is the access policy of addr3_cnt_reg?
+Answer: read-only.
+Q # 6:What is the address of mem_size_reg?
+Answer: @3912 +'h100d.
+Q # 7:What is the starting address of the packet memory?
+Answer: @3762 +'h1010
